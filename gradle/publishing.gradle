@@ -1,0 +1,71 @@
+// Applied from the bottom of each module's build.gradle, never from the root's
+// subprojects block: the Android plugin registers the `release` component in
+// its own afterEvaluate, and a hook the root queued first would run before it
+// exists. Applying here puts this hook behind AGP's.
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                artifactId = project.name
+
+                pom {
+                    name = project.name
+                    description = project.moduleDescription
+                    url = 'https://appatlas.dev'
+
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'pjy0509'
+                            name = 'Park Jungyoung'
+                            email = 'qkrwnss0509@gmail.com'
+                        }
+                    }
+
+                    scm {
+                        url = 'https://github.com/pjy0509/atlas-sdk-android'
+                        connection = 'scm:git:https://github.com/pjy0509/atlas-sdk-android.git'
+                        developerConnection = 'scm:git:ssh://git@github.com/pjy0509/atlas-sdk-android.git'
+                    }
+                }
+            }
+        }
+
+        repositories {
+            maven {
+                name = 'central'
+                url = project.version.toString().endsWith('SNAPSHOT')
+                        ? 'https://central.sonatype.com/repository/maven-snapshots/'
+                        : 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
+
+                credentials {
+                    username = project.findProperty('centralUsername') ?: System.getenv('CENTRAL_USERNAME')
+                    password = project.findProperty('centralPassword') ?: System.getenv('CENTRAL_PASSWORD')
+                }
+            }
+        }
+    }
+
+    signing {
+        // In-memory keys so CI never writes a keyring to disk; without them the
+        // build still publishes unsigned to mavenLocal, which is what the
+        // release check does.
+        def key = project.findProperty('signingInMemoryKey') ?: System.getenv('SIGNING_KEY')
+        def password = project.findProperty('signingInMemoryKeyPassword') ?: System.getenv('SIGNING_PASSWORD')
+
+        if (key) {
+            useInMemoryPgpKeys(key.toString(), password?.toString() ?: '')
+            sign publishing.publications.release
+        }
+    }
+}

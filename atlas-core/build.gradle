@@ -11,16 +11,22 @@ android {
         consumerProguardFiles 'consumer-rules.pro'
     }
 
+    // The sources stay Java 7 syntax — that is what an old toolchain needs —
+    // but modern JDKs refuse to compile against level 7, so the target is 8.
+    // Nothing here uses a Java 8 language feature, so nothing is desugared.
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     publishing {
         singleVariant('release') {
             withSourcesJar()
+            withJavadocJar()
         }
     }
 }
 
 ext.moduleDescription = 'The transport half of the App Atlas SDK: envelopes, the disk queue and the sender.'
+
+apply from: rootProject.file('gradle/publishing.gradle')
