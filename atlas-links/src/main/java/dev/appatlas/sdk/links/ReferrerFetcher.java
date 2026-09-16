@@ -44,8 +44,8 @@ final class ReferrerFetcher {
         try {
             connect();
         } catch (NoClassDefFoundError absent) {
-            // The installreferrer library is compileOnly: an app built
-            // without it simply has no deferred deep links.
+            // The app excluded the installreferrer dependency: it simply
+            // has no deferred deep links.
             settle(null);
         }
     }

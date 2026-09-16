@@ -1,14 +1,17 @@
 # Atlas SDK for Android
 
-The client half of [App Atlas](https://appatlas.dev) on Android. Pure Java, no
-dependencies, **minSdk 16** — the floor the incumbents walked away from.
+[한국어](README.ko.md) · [中文](README.zh.md)
+
+The client half of [App Atlas](https://appatlas.dev) on Android. Pure Java,
+**minSdk 16** — the floor the incumbents walked away from.
 
 ```gradle
 dependencies {
-    implementation 'dev.appatlas:atlas-links:0.1.0'   // pulls atlas-core
+    implementation 'dev.appatlas:atlas-links:0.1.1'   // pulls atlas-core
 }
 ```
 
+<!-- guide:start -->
 ```java
 // Application.onCreate
 Atlas.start(this, "sdk_…");
@@ -39,8 +42,8 @@ install, forever, for referral rewards.
 | `atlas-core` | Envelopes, the disk queue, the sender. Every module rides it. | 16 |
 | `atlas-links` | Deep-link inflow: deferred claims and direct opens. | 16 |
 
-`atlas-links` declares the Play install-referrer library `compileOnly`: an app
-built without it loses only the deferred path, never a compile.
+`atlas-links` brings the Play install-referrer library with it, so the
+deferred link works with the one dependency above.
 
 ## Deep-link detection (optional)
 
@@ -69,6 +72,7 @@ The SDK mints an install-scoped random id and reads no device or advertising
 identifier — not GAID, not the hardware id, nothing that survives an uninstall.
 Device context (OS version, model, locale, timezone, app version, installer) is
 the standard crash-report set and identifies no one.
+<!-- guide:end -->
 
 ## Checks
 

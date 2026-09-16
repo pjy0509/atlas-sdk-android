@@ -1,7 +1,7 @@
 // atlas-links: deferred deep links off the install referrer, direct opens off
-// the activity intent. The referrer library is compileOnly on purpose — an
-// app built without it loses only the deferred path (ReferrerFetcher guards
-// the absence), the way Adjust keeps store clients optional.
+// the activity intent. The referrer library ships as a real dependency so the
+// deferred path works out of the box; ReferrerFetcher still guards absence
+// for an app that excludes it.
 apply plugin: 'com.android.library'
 
 android {
@@ -31,7 +31,7 @@ android {
 
 dependencies {
     api project(':atlas-core')
-    compileOnly 'com.android.installreferrer:installreferrer:2.2'
+    implementation 'com.android.installreferrer:installreferrer:2.2'
 }
 
 ext.moduleDescription = 'Deep-link inflow for the App Atlas SDK: deferred links off the install referrer, direct opens off the intent.'

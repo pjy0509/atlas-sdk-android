@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class AtlasCore {
 
-    public static final String VERSION = "0.1.0";
+    public static final String VERSION = "0.1.1";
 
     private final String sdkName;
     private final String baseUrl;
