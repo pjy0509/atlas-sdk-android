@@ -42,6 +42,14 @@ afterEvaluate {
         }
 
         repositories {
+            // A local staging tree in the Maven layout: what the Central
+            // Portal takes as a bundle, and what lets the contents be read
+            // before anything leaves the machine.
+            maven {
+                name = 'centralBundle'
+                url = rootProject.layout.buildDirectory.dir('central-bundle')
+            }
+
             maven {
                 name = 'central'
                 url = project.version.toString().endsWith('SNAPSHOT')
