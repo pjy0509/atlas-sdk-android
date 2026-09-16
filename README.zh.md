@@ -5,13 +5,65 @@
 [App Atlas](https://appatlas.dev) 的 Android 客户端。纯 Java，
 **minSdk 16** 起支持。这是其他 SDK 早已放弃的下限。
 
+## 安装
+
+<!-- tabs:start -->
+#### build.gradle
+
 ```gradle
 dependencies {
-    implementation 'dev.appatlas:atlas-links:0.1.1'   // 会一并引入 atlas-core
+    implementation 'dev.appatlas:atlas-links:0.1.1'
 }
 ```
 
+#### build.gradle.kts
+
+```kotlin
+dependencies {
+    implementation("dev.appatlas:atlas-links:0.1.1")
+}
+```
+
+#### libs.versions.toml
+
+```toml
+[libraries]
+atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
+```
+
+#### pom.xml
+
+```xml
+<dependency>
+  <groupId>dev.appatlas</groupId>
+  <artifactId>atlas-links</artifactId>
+  <version>0.1.1</version>
+  <type>aar</type>
+</dependency>
+```
+<!-- tabs:end -->
+
 <!-- guide:start -->
+<!-- tabs:start -->
+#### Kotlin
+
+```kotlin
+// Application.onCreate
+Atlas.start(this, "sdk_…")
+
+AtlasLinks.setListener { link ->
+    // link.payload / link.path / link.deferred / link.match
+    // link.channel / link.campaign / link.shortId
+}
+```
+
+```kotlin
+// 在启动器 Activity 中每次启动都调用。旧 Intent 的重复投递已在内部拦截。
+AtlasLinks.handle(intent)
+```
+
+#### Java
+
 ```java
 // Application.onCreate
 Atlas.start(this, "sdk_…");
@@ -29,6 +81,7 @@ AtlasLinks.setListener(new AtlasLinkListener() {
 // 在启动器 Activity 中每次启动都调用。旧 Intent 的重复投递已在内部拦截。
 AtlasLinks.handle(getIntent());
 ```
+<!-- tabs:end -->
 
 延迟链接无需额外调用：首次启动会读取一次 Play install referrer，
 兑换其中携带的令牌，同一个监听器随即收到链接。

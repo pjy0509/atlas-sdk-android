@@ -5,13 +5,65 @@
 The client half of [App Atlas](https://appatlas.dev) on Android. Pure Java,
 **minSdk 16** — the floor the incumbents walked away from.
 
+## Install
+
+<!-- tabs:start -->
+#### build.gradle
+
 ```gradle
 dependencies {
-    implementation 'dev.appatlas:atlas-links:0.1.1'   // pulls atlas-core
+    implementation 'dev.appatlas:atlas-links:0.1.1'
 }
 ```
 
+#### build.gradle.kts
+
+```kotlin
+dependencies {
+    implementation("dev.appatlas:atlas-links:0.1.1")
+}
+```
+
+#### libs.versions.toml
+
+```toml
+[libraries]
+atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
+```
+
+#### pom.xml
+
+```xml
+<dependency>
+  <groupId>dev.appatlas</groupId>
+  <artifactId>atlas-links</artifactId>
+  <version>0.1.1</version>
+  <type>aar</type>
+</dependency>
+```
+<!-- tabs:end -->
+
 <!-- guide:start -->
+<!-- tabs:start -->
+#### Kotlin
+
+```kotlin
+// Application.onCreate
+Atlas.start(this, "sdk_…")
+
+AtlasLinks.setListener { link ->
+    // link.payload / link.path / link.deferred / link.match
+    // link.channel / link.campaign / link.shortId
+}
+```
+
+```kotlin
+// The launcher activity, on every start — stale-intent guards are built in.
+AtlasLinks.handle(intent)
+```
+
+#### Java
+
 ```java
 // Application.onCreate
 Atlas.start(this, "sdk_…");
@@ -29,6 +81,7 @@ AtlasLinks.setListener(new AtlasLinkListener() {
 // The launcher activity, on every start — stale-intent guards are built in.
 AtlasLinks.handle(getIntent());
 ```
+<!-- tabs:end -->
 
 A deferred link needs no extra call: the first launch reads the Play install
 referrer once, claims the token it carries, and the same listener receives the

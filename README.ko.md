@@ -5,13 +5,65 @@
 [App Atlas](https://appatlas.dev)의 Android 클라이언트. 순수 Java이며
 **minSdk 16**부터 지원합니다. 기존 SDK들이 버린 하한입니다.
 
+## 설치
+
+<!-- tabs:start -->
+#### build.gradle
+
 ```gradle
 dependencies {
-    implementation 'dev.appatlas:atlas-links:0.1.1'   // atlas-core를 함께 가져옵니다
+    implementation 'dev.appatlas:atlas-links:0.1.1'
 }
 ```
 
+#### build.gradle.kts
+
+```kotlin
+dependencies {
+    implementation("dev.appatlas:atlas-links:0.1.1")
+}
+```
+
+#### libs.versions.toml
+
+```toml
+[libraries]
+atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
+```
+
+#### pom.xml
+
+```xml
+<dependency>
+  <groupId>dev.appatlas</groupId>
+  <artifactId>atlas-links</artifactId>
+  <version>0.1.1</version>
+  <type>aar</type>
+</dependency>
+```
+<!-- tabs:end -->
+
 <!-- guide:start -->
+<!-- tabs:start -->
+#### Kotlin
+
+```kotlin
+// Application.onCreate
+Atlas.start(this, "sdk_…")
+
+AtlasLinks.setListener { link ->
+    // link.payload / link.path / link.deferred / link.match
+    // link.channel / link.campaign / link.shortId
+}
+```
+
+```kotlin
+// 런처 액티비티에서 매 시작마다 호출합니다. 오래된 인텐트 재전달은 내부에서 걸러냅니다.
+AtlasLinks.handle(intent)
+```
+
+#### Java
+
 ```java
 // Application.onCreate
 Atlas.start(this, "sdk_…");
@@ -29,6 +81,7 @@ AtlasLinks.setListener(new AtlasLinkListener() {
 // 런처 액티비티에서 매 시작마다 호출합니다. 오래된 인텐트 재전달은 내부에서 걸러냅니다.
 AtlasLinks.handle(getIntent());
 ```
+<!-- tabs:end -->
 
 디퍼드 링크는 따로 호출할 것이 없습니다. 첫 실행이 Play install referrer를
 한 번 읽고 거기 실린 토큰을 교환하며, 같은 리스너가 링크를 받습니다.
