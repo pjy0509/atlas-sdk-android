@@ -81,13 +81,20 @@ public class MyApplication extends Application {
 #### Kotlin
 
 ```kotlin title="MyApplication.kt"
-// MyApplication.kt: Atlas.start 다음 줄.
-AtlasLinks.setListener { link ->
-    // 직접 열림과 디퍼드 링크가 같은 자리로 옵니다.
-    // link.deferred: 설치를 건너온 링크면 true.
-    // link.match: referrer / clipboard / campaign_id / relink.
-    // link.path와 link.payload로 화면을 이동합니다. 예:
-    // link.path?.let { openScreen(it, link.payload) }
+// MyApplication.kt: 매니페스트 <application>의 android:name으로 등록된 클래스.
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Atlas.start(this, "sdk_…")
+
+        AtlasLinks.setListener { link ->
+            // 직접 열림과 디퍼드 링크가 같은 자리로 옵니다.
+            // link.deferred: 설치를 건너온 링크면 true.
+            // link.match: referrer / clipboard / campaign_id / relink.
+            // link.path와 link.payload로 화면을 이동합니다. 예:
+            // link.path?.let { openScreen(it, link.payload) }
+        }
+    }
 }
 ```
 
@@ -108,17 +115,25 @@ override fun onNewIntent(intent: Intent) {
 #### Java
 
 ```java title="MyApplication.java"
-// MyApplication.java: Atlas.start 다음 줄.
-AtlasLinks.setListener(new AtlasLinkListener() {
+// MyApplication.java: 매니페스트 <application>의 android:name으로 등록된 클래스.
+public class MyApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Atlas.start(this, "sdk_…");
+
+        AtlasLinks.setListener(new AtlasLinkListener() {
     @Override
     public void onLink(AtlasLink link) {
-        // 직접 열림과 디퍼드 링크가 같은 자리로 옵니다.
-        // link.deferred: 설치를 건너온 링크면 true.
-        // link.match: referrer / clipboard / campaign_id / relink.
-        // link.path와 link.payload로 화면을 이동합니다. 예:
-        // if (link.path != null) openScreen(link.path, link.payload);
+                // 직접 열림과 디퍼드 링크가 같은 자리로 옵니다.
+                // link.deferred: 설치를 건너온 링크면 true.
+                // link.match: referrer / clipboard / campaign_id / relink.
+                // link.path와 link.payload로 화면을 이동합니다. 예:
+                // if (link.path != null) openScreen(link.path, link.payload);
+            }
+        });
     }
-});
+}
 ```
 
 ```java title="MainActivity.java"

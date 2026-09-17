@@ -81,13 +81,20 @@ public class MyApplication extends Application {
 #### Kotlin
 
 ```kotlin title="MyApplication.kt"
-// MyApplication.kt: the line after Atlas.start.
-AtlasLinks.setListener { link ->
-    // Direct opens and the deferred link arrive here alike.
-    // link.deferred: true when the link crossed the install.
-    // link.match: referrer / clipboard / campaign_id / relink.
-    // Route with link.path and link.payload, e.g.:
-    // link.path?.let { openScreen(it, link.payload) }
+// MyApplication.kt: the class the manifest names as android:name on <application>.
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Atlas.start(this, "sdk_…")
+
+        AtlasLinks.setListener { link ->
+            // Direct opens and the deferred link arrive here alike.
+            // link.deferred: true when the link crossed the install.
+            // link.match: referrer / clipboard / campaign_id / relink.
+            // Route with link.path and link.payload, e.g.:
+            // link.path?.let { openScreen(it, link.payload) }
+        }
+    }
 }
 ```
 
@@ -108,17 +115,25 @@ override fun onNewIntent(intent: Intent) {
 #### Java
 
 ```java title="MyApplication.java"
-// MyApplication.java: the line after Atlas.start.
-AtlasLinks.setListener(new AtlasLinkListener() {
+// MyApplication.java: the class the manifest names as android:name on <application>.
+public class MyApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Atlas.start(this, "sdk_…");
+
+        AtlasLinks.setListener(new AtlasLinkListener() {
     @Override
     public void onLink(AtlasLink link) {
-        // Direct opens and the deferred link arrive here alike.
-        // link.deferred: true when the link crossed the install.
-        // link.match: referrer / clipboard / campaign_id / relink.
-        // Route with link.path and link.payload, e.g.:
-        // if (link.path != null) openScreen(link.path, link.payload);
+                // Direct opens and the deferred link arrive here alike.
+                // link.deferred: true when the link crossed the install.
+                // link.match: referrer / clipboard / campaign_id / relink.
+                // Route with link.path and link.payload, e.g.:
+                // if (link.path != null) openScreen(link.path, link.payload);
+            }
+        });
     }
-});
+}
 ```
 
 ```java title="MainActivity.java"

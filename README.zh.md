@@ -81,13 +81,20 @@ public class MyApplication extends Application {
 #### Kotlin
 
 ```kotlin title="MyApplication.kt"
-// MyApplication.kt: Atlas.start 的下一行。
-AtlasLinks.setListener { link ->
-    // 直接打开与延迟链接都到达这里。
-    // link.deferred: 跨越了安装的链接为 true。
-    // link.match: referrer / clipboard / campaign_id / relink。
-    // 用 link.path 与 link.payload 做页面跳转，例如：
-    // link.path?.let { openScreen(it, link.payload) }
+// MyApplication.kt: 清单 <application> 的 android:name 所注册的类。
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Atlas.start(this, "sdk_…")
+
+        AtlasLinks.setListener { link ->
+            // 直接打开与延迟链接都到达这里。
+            // link.deferred: 跨越了安装的链接为 true。
+            // link.match: referrer / clipboard / campaign_id / relink。
+            // 用 link.path 与 link.payload 做页面跳转，例如：
+            // link.path?.let { openScreen(it, link.payload) }
+        }
+    }
 }
 ```
 
@@ -108,17 +115,25 @@ override fun onNewIntent(intent: Intent) {
 #### Java
 
 ```java title="MyApplication.java"
-// MyApplication.java: Atlas.start 的下一行。
-AtlasLinks.setListener(new AtlasLinkListener() {
+// MyApplication.java: 清单 <application> 的 android:name 所注册的类。
+public class MyApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Atlas.start(this, "sdk_…");
+
+        AtlasLinks.setListener(new AtlasLinkListener() {
     @Override
     public void onLink(AtlasLink link) {
-        // 直接打开与延迟链接都到达这里。
-        // link.deferred: 跨越了安装的链接为 true。
-        // link.match: referrer / clipboard / campaign_id / relink。
-        // 用 link.path 与 link.payload 做页面跳转，例如：
-        // if (link.path != null) openScreen(link.path, link.payload);
+                // 直接打开与延迟链接都到达这里。
+                // link.deferred: 跨越了安装的链接为 true。
+                // link.match: referrer / clipboard / campaign_id / relink。
+                // 用 link.path 与 link.payload 做页面跳转，例如：
+                // if (link.path != null) openScreen(link.path, link.payload);
+            }
+        });
     }
-});
+}
 ```
 
 ```java title="MainActivity.java"
