@@ -48,38 +48,77 @@ atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
 #### Kotlin
 
 ```kotlin
-// Application.onCreate
-Atlas.start(this, "sdk_…")
+// MyApplication.kt: 매니페스트 <application>의 android:name으로 등록된 클래스.
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Atlas.start(this, "sdk_…")
 
-AtlasLinks.setListener { link ->
-    // link.payload / link.path / link.deferred / link.match
-    // link.channel / link.campaign / link.shortId
+        AtlasLinks.setListener { link ->
+            // 직접 열림과 디퍼드 링크가 같은 자리로 옵니다.
+            // link.deferred: 설치를 건너온 링크면 true.
+            // link.match: referrer / clipboard / campaign_id / relink.
+            // link.path와 link.payload로 화면을 이동합니다. 예:
+            // link.path?.let { openScreen(it, link.payload) }
+        }
+        // 디퍼드는 이걸로 끝입니다. 첫 실행이 Play install referrer를 스스로 읽습니다.
+    }
 }
 ```
 
 ```kotlin
-// 런처 액티비티에서 매 시작마다 호출합니다. 오래된 인텐트 재전달은 내부에서 걸러냅니다.
-AtlasLinks.handle(intent)
+// MainActivity.kt: 런처 액티비티. 오래된 인텐트 재전달은 내부에서 걸러냅니다.
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    AtlasLinks.handle(intent)
+}
+
+// singleTop 액티비티는 다시 열릴 때 여기로 옵니다.
+override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    AtlasLinks.handle(intent)
+}
 ```
 
 #### Java
 
 ```java
-// Application.onCreate
-Atlas.start(this, "sdk_…");
-
-AtlasLinks.setListener(new AtlasLinkListener() {
+// MyApplication.java: 매니페스트 <application>의 android:name으로 등록된 클래스.
+public class MyApplication extends Application {
     @Override
-    public void onLink(AtlasLink link) {
-        // link.payload / link.path / link.deferred / link.match
-        // link.channel / link.campaign / link.shortId
+    public void onCreate() {
+        super.onCreate();
+        Atlas.start(this, "sdk_…");
+
+        AtlasLinks.setListener(new AtlasLinkListener() {
+            @Override
+            public void onLink(AtlasLink link) {
+                // 직접 열림과 디퍼드 링크가 같은 자리로 옵니다.
+                // link.deferred: 설치를 건너온 링크면 true.
+                // link.match: referrer / clipboard / campaign_id / relink.
+                // link.path와 link.payload로 화면을 이동합니다. 예:
+                // if (link.path != null) openScreen(link.path, link.payload);
+            }
+        });
+        // 디퍼드는 이걸로 끝입니다. 첫 실행이 Play install referrer를 스스로 읽습니다.
     }
-});
+}
 ```
 
 ```java
-// 런처 액티비티에서 매 시작마다 호출합니다. 오래된 인텐트 재전달은 내부에서 걸러냅니다.
-AtlasLinks.handle(getIntent());
+// MainActivity.java: 런처 액티비티. 오래된 인텐트 재전달은 내부에서 걸러냅니다.
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    AtlasLinks.handle(getIntent());
+}
+
+// singleTop 액티비티는 다시 열릴 때 여기로 옵니다.
+@Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    AtlasLinks.handle(intent);
+}
 ```
 <!-- tabs:end -->
 

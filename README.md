@@ -48,38 +48,77 @@ atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
 #### Kotlin
 
 ```kotlin
-// Application.onCreate
-Atlas.start(this, "sdk_…")
+// MyApplication.kt: the class the manifest names as android:name on <application>.
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Atlas.start(this, "sdk_…")
 
-AtlasLinks.setListener { link ->
-    // link.payload / link.path / link.deferred / link.match
-    // link.channel / link.campaign / link.shortId
+        AtlasLinks.setListener { link ->
+            // Direct opens and the deferred link arrive here alike.
+            // link.deferred: true when the link crossed the install.
+            // link.match: referrer / clipboard / campaign_id / relink.
+            // Route with link.path and link.payload, e.g.:
+            // link.path?.let { openScreen(it, link.payload) }
+        }
+        // Deferred ends here: the first launch reads the Play install referrer itself.
+    }
 }
 ```
 
 ```kotlin
-// The launcher activity, on every start — stale-intent guards are built in.
-AtlasLinks.handle(intent)
+// MainActivity.kt: the launcher activity. Stale-intent guards are built in.
+override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    AtlasLinks.handle(intent)
+}
+
+// A singleTop activity is re-entered here instead.
+override fun onNewIntent(intent: Intent) {
+    super.onNewIntent(intent)
+    AtlasLinks.handle(intent)
+}
 ```
 
 #### Java
 
 ```java
-// Application.onCreate
-Atlas.start(this, "sdk_…");
-
-AtlasLinks.setListener(new AtlasLinkListener() {
+// MyApplication.java: the class the manifest names as android:name on <application>.
+public class MyApplication extends Application {
     @Override
-    public void onLink(AtlasLink link) {
-        // link.payload / link.path / link.deferred / link.match
-        // link.channel / link.campaign / link.shortId
+    public void onCreate() {
+        super.onCreate();
+        Atlas.start(this, "sdk_…");
+
+        AtlasLinks.setListener(new AtlasLinkListener() {
+            @Override
+            public void onLink(AtlasLink link) {
+                // Direct opens and the deferred link arrive here alike.
+                // link.deferred: true when the link crossed the install.
+                // link.match: referrer / clipboard / campaign_id / relink.
+                // Route with link.path and link.payload, e.g.:
+                // if (link.path != null) openScreen(link.path, link.payload);
+            }
+        });
+        // Deferred ends here: the first launch reads the Play install referrer itself.
     }
-});
+}
 ```
 
 ```java
-// The launcher activity, on every start — stale-intent guards are built in.
-AtlasLinks.handle(getIntent());
+// MainActivity.java: the launcher activity. Stale-intent guards are built in.
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    AtlasLinks.handle(getIntent());
+}
+
+// A singleTop activity is re-entered here instead.
+@Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    AtlasLinks.handle(intent);
+}
 ```
 <!-- tabs:end -->
 
