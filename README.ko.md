@@ -123,8 +123,8 @@ public class MyApplication extends Application {
         Atlas.start(this, "sdk_…");
 
         AtlasLinks.setListener(new AtlasLinkListener() {
-    @Override
-    public void onLink(AtlasLink link) {
+            @Override
+            public void onLink(AtlasLink link) {
                 // 직접 열림과 디퍼드 링크가 같은 자리로 옵니다.
                 // link.deferred: 설치를 건너온 링크면 true.
                 // link.match: referrer / clipboard / campaign_id / relink.

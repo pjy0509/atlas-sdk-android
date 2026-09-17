@@ -123,8 +123,8 @@ public class MyApplication extends Application {
         Atlas.start(this, "sdk_…");
 
         AtlasLinks.setListener(new AtlasLinkListener() {
-    @Override
-    public void onLink(AtlasLink link) {
+            @Override
+            public void onLink(AtlasLink link) {
                 // 直接打开与延迟链接都到达这里。
                 // link.deferred: 跨越了安装的链接为 true。
                 // link.match: referrer / clipboard / campaign_id / relink。
