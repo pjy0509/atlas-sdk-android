@@ -47,7 +47,7 @@ atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
 <!-- tabs:start -->
 #### Kotlin
 
-```kotlin
+```kotlin title="MyApplication.kt"
 // MyApplication.kt: 매니페스트 <application>의 android:name으로 등록된 클래스.
 class MyApplication : Application() {
     override fun onCreate() {
@@ -66,7 +66,7 @@ class MyApplication : Application() {
 }
 ```
 
-```kotlin
+```kotlin title="MainActivity.kt"
 // MainActivity.kt: 런처 액티비티. 오래된 인텐트 재전달은 내부에서 걸러냅니다.
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -82,7 +82,7 @@ override fun onNewIntent(intent: Intent) {
 
 #### Java
 
-```java
+```java title="MyApplication.java"
 // MyApplication.java: 매니페스트 <application>의 android:name으로 등록된 클래스.
 public class MyApplication extends Application {
     @Override
@@ -105,7 +105,7 @@ public class MyApplication extends Application {
 }
 ```
 
-```java
+```java title="MainActivity.java"
 // MainActivity.java: 런처 액티비티. 오래된 인텐트 재전달은 내부에서 걸러냅니다.
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -143,11 +143,11 @@ protected void onNewIntent(Intent intent) {
 답하려면, 앱이 링크 출처를 보증해야 합니다. `AndroidManifest.xml`의
 `<application>` 안에 추가합니다.
 
-```xml
+```xml title="AndroidManifest.xml"
 <meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
 ```
 
-```xml
+```xml title="res/values/strings.xml"
 <!-- res/values/strings.xml — asset_statements가 이미 있다면 아래 객체를
      기존 배열에 추가합니다. -->
 <string name="asset_statements" translatable="false">

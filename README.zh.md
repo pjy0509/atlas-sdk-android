@@ -47,7 +47,7 @@ atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
 <!-- tabs:start -->
 #### Kotlin
 
-```kotlin
+```kotlin title="MyApplication.kt"
 // MyApplication.kt: 清单 <application> 的 android:name 所注册的类。
 class MyApplication : Application() {
     override fun onCreate() {
@@ -66,7 +66,7 @@ class MyApplication : Application() {
 }
 ```
 
-```kotlin
+```kotlin title="MainActivity.kt"
 // MainActivity.kt: 启动器 Activity。旧 Intent 的重复投递已在内部拦截。
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -82,7 +82,7 @@ override fun onNewIntent(intent: Intent) {
 
 #### Java
 
-```java
+```java title="MyApplication.java"
 // MyApplication.java: 清单 <application> 的 android:name 所注册的类。
 public class MyApplication extends Application {
     @Override
@@ -105,7 +105,7 @@ public class MyApplication extends Application {
 }
 ```
 
-```java
+```java title="MainActivity.java"
 // MainActivity.java: 启动器 Activity。旧 Intent 的重复投递已在内部拦截。
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -143,11 +143,11 @@ protected void onNewIntent(Intent intent) {
 而不是猜测，应用需要为链接来源作保。在 `AndroidManifest.xml` 的
 `<application>` 内添加：
 
-```xml
+```xml title="AndroidManifest.xml"
 <meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
 ```
 
-```xml
+```xml title="res/values/strings.xml"
 <!-- res/values/strings.xml — 如果已有 asset_statements，把下面的对象
      加进现有数组即可。 -->
 <string name="asset_statements" translatable="false">

@@ -47,7 +47,7 @@ atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
 <!-- tabs:start -->
 #### Kotlin
 
-```kotlin
+```kotlin title="MyApplication.kt"
 // MyApplication.kt: the class the manifest names as android:name on <application>.
 class MyApplication : Application() {
     override fun onCreate() {
@@ -66,7 +66,7 @@ class MyApplication : Application() {
 }
 ```
 
-```kotlin
+```kotlin title="MainActivity.kt"
 // MainActivity.kt: the launcher activity. Stale-intent guards are built in.
 override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -82,7 +82,7 @@ override fun onNewIntent(intent: Intent) {
 
 #### Java
 
-```java
+```java title="MyApplication.java"
 // MyApplication.java: the class the manifest names as android:name on <application>.
 public class MyApplication extends Application {
     @Override
@@ -105,7 +105,7 @@ public class MyApplication extends Application {
 }
 ```
 
-```java
+```java title="MainActivity.java"
 // MainActivity.java: the launcher activity. Stale-intent guards are built in.
 @Override
 protected void onCreate(Bundle savedInstanceState) {
@@ -143,11 +143,11 @@ For `navigator.getInstalledRelatedApps()` to answer "installed" on the visit
 page instead of guessing, the app must vouch for the link's origin. Add to
 `AndroidManifest.xml` inside `<application>`:
 
-```xml
+```xml title="AndroidManifest.xml"
 <meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
 ```
 
-```xml
+```xml title="res/values/strings.xml"
 <!-- res/values/strings.xml — if you already have asset_statements, add the
      object below to your existing array instead. -->
 <string name="asset_statements" translatable="false">
