@@ -44,6 +44,8 @@ atlas-links = { module = "dev.appatlas:atlas-links", version = "0.1.1" }
 <!-- tabs:end -->
 
 <!-- guide:start -->
+## 启动
+
 <!-- tabs:start -->
 #### Kotlin
 
@@ -53,16 +55,39 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         Atlas.start(this, "sdk_…")
-
-        AtlasLinks.setListener { link ->
-            // 直接打开与延迟链接都到达这里。
-            // link.deferred: 跨越了安装的链接为 true。
-            // link.match: referrer / clipboard / campaign_id / relink。
-            // 用 link.path 与 link.payload 做页面跳转，例如：
-            // link.path?.let { openScreen(it, link.payload) }
-        }
-        // 延迟链接到此为止：首次启动会自行读取 Play install referrer。
+        // 各模块（Links，之后的 Push 与 Crash）从下一行开始接线。
     }
+}
+```
+
+#### Java
+
+```java title="MyApplication.java"
+// MyApplication.java: 清单 <application> 的 android:name 所注册的类。
+public class MyApplication extends Application {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Atlas.start(this, "sdk_…");
+        // 各模块（Links，之后的 Push 与 Crash）从下一行开始接线。
+    }
+}
+```
+<!-- tabs:end -->
+
+## Links
+
+<!-- tabs:start -->
+#### Kotlin
+
+```kotlin title="MyApplication.kt"
+// MyApplication.kt: Atlas.start 的下一行。
+AtlasLinks.setListener { link ->
+    // 直接打开与延迟链接都到达这里。
+    // link.deferred: 跨越了安装的链接为 true。
+    // link.match: referrer / clipboard / campaign_id / relink。
+    // 用 link.path 与 link.payload 做页面跳转，例如：
+    // link.path?.let { openScreen(it, link.payload) }
 }
 ```
 
@@ -83,26 +108,17 @@ override fun onNewIntent(intent: Intent) {
 #### Java
 
 ```java title="MyApplication.java"
-// MyApplication.java: 清单 <application> 的 android:name 所注册的类。
-public class MyApplication extends Application {
+// MyApplication.java: Atlas.start 的下一行。
+AtlasLinks.setListener(new AtlasLinkListener() {
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Atlas.start(this, "sdk_…");
-
-        AtlasLinks.setListener(new AtlasLinkListener() {
-            @Override
-            public void onLink(AtlasLink link) {
-                // 直接打开与延迟链接都到达这里。
-                // link.deferred: 跨越了安装的链接为 true。
-                // link.match: referrer / clipboard / campaign_id / relink。
-                // 用 link.path 与 link.payload 做页面跳转，例如：
-                // if (link.path != null) openScreen(link.path, link.payload);
-            }
-        });
-        // 延迟链接到此为止：首次启动会自行读取 Play install referrer。
+    public void onLink(AtlasLink link) {
+        // 直接打开与延迟链接都到达这里。
+        // link.deferred: 跨越了安装的链接为 true。
+        // link.match: referrer / clipboard / campaign_id / relink。
+        // 用 link.path 与 link.payload 做页面跳转，例如：
+        // if (link.path != null) openScreen(link.path, link.payload);
     }
-}
+});
 ```
 
 ```java title="MainActivity.java"
