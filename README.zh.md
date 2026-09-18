@@ -63,7 +63,8 @@ atlas-crash-ndk = { module = "dev.appatlas:atlas-crash-ndk", version = "0.2.0" }
 <!-- tabs:end -->
 
 <!-- guide:start -->
-## 启动
+
+## 核心
 
 <!-- tabs:start -->
 #### Kotlin
@@ -93,6 +94,18 @@ public class MyApplication extends Application {
 }
 ```
 <!-- tabs:end -->
+
+### 模块
+
+| 构件 | 作用 | minSdk |
+|---|---|---|
+| `atlas-core` | 信封、磁盘队列、发送器。所有模块的基础。 | 16 |
+| `atlas-links` | 深层链接流入：延迟兑换与直接打开。 | 16 |
+| `atlas-crash` | 崩溃报告：未捕获异常、已处理错误、ANR、kill、会话。 | 16 |
+| `atlas-crash-ndk` | C/C++ 代码的原生信号捕获：SIGSEGV、SIGABRT、SIGBUS、SIGFPE、SIGILL。 | 21 |
+
+`atlas-links` 会一并带上 Play install-referrer 库，
+因此上面这一个依赖就能让延迟链接工作。
 
 ## Links
 
@@ -176,6 +189,27 @@ protected void onNewIntent(Intent intent) {
 兑换其中携带的令牌，同一个监听器随即收到链接。
 `AtlasLinks.firstReferringLink()` 永久返回产生这次安装的链接，
 可用于推荐奖励。
+
+### 深层链接检测（可选）
+
+要让访问页面上的 `navigator.getInstalledRelatedApps()` 明确回答"已安装"
+而不是猜测，应用需要为链接来源作保。在 `AndroidManifest.xml` 的
+`<application>` 内添加：
+
+```xml title="AndroidManifest.xml"
+<meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
+```
+
+```xml title="res/values/strings.xml"
+<!-- res/values/strings.xml — 如果已有 asset_statements，把下面的对象
+     加进现有数组即可。 -->
+<string name="asset_statements" translatable="false">
+  [{
+    \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+    \"target\": {\"namespace\": \"web\", \"site\": \"https://appatlas.dev\"}
+  }]
+</string>
+```
 
 ## Crash
 
@@ -265,19 +299,7 @@ crash-free 会话即据此计算。每份报告都附带最近 100 条面包屑�
 `AtlasCrash.setEnabled(false)` 会停止收集并记住该选择，可用于同意界面。
 `AtlasCrash.crashedLastRun()` 返回上次运行是否以崩溃结束。
 
-## 模块
-
-| 构件 | 作用 | minSdk |
-|---|---|---|
-| `atlas-core` | 信封、磁盘队列、发送器。所有模块的基础。 | 16 |
-| `atlas-links` | 深层链接流入：延迟兑换与直接打开。 | 16 |
-| `atlas-crash` | 崩溃报告：未捕获异常、已处理错误、ANR、kill、会话。 | 16 |
-| `atlas-crash-ndk` | C/C++ 代码的原生信号捕获：SIGSEGV、SIGABRT、SIGBUS、SIGFPE、SIGILL。 | 21 |
-
-`atlas-links` 会一并带上 Play install-referrer 库，
-因此上面这一个依赖就能让延迟链接工作。
-
-## 可读的堆栈（混淆构建）
+### 可读的堆栈（混淆构建）
 
 经 R8 混淆的构建会上报混淆后的帧。为每次构建生成一个 id 写入清单，
 并以同一 id 上传该构建的 `mapping.txt`。
@@ -309,7 +331,7 @@ tasks.register('uploadAtlasMapping', Exec) {
 <meta-data android:name="dev.appatlas.sdk.mappingId" android:value="${atlasMappingId}"/>
 ```
 
-## 原生堆栈
+### 原生堆栈
 
 原生崩溃以 build id 和模块相对地址上报。上传你发布的、未剥离符号的 `.so`，服务器即可还原函数、文件与行号。
 id 是库自身的 GNU build id，由服务器从文件中读取，因此只需上传文件。
@@ -325,33 +347,13 @@ for so in app/build/intermediates/merged_native_libs/release/mergeReleaseNativeL
 done
 ```
 
-## 深层链接检测（可选）
-
-要让访问页面上的 `navigator.getInstalledRelatedApps()` 明确回答"已安装"
-而不是猜测，应用需要为链接来源作保。在 `AndroidManifest.xml` 的
-`<application>` 内添加：
-
-```xml title="AndroidManifest.xml"
-<meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
-```
-
-```xml title="res/values/strings.xml"
-<!-- res/values/strings.xml — 如果已有 asset_statements，把下面的对象
-     加进现有数组即可。 -->
-<string name="asset_statements" translatable="false">
-  [{
-    \"relation\": [\"delegate_permission/common.handle_all_urls\"],
-    \"target\": {\"namespace\": \"web\", \"site\": \"https://appatlas.dev\"}
-  }]
-</string>
-```
-
 ## 隐私
 
 SDK 只生成一个安装范围内的随机 id，不读取任何设备或广告标识符：
 不读 GAID，不读硬件 id，不读任何卸载后仍然存在的东西。
 随附发送的设备信息（系统版本、机型、区域、时区、应用版本、安装来源）
 是常见的崩溃报告字段，不指向任何人。
+
 <!-- guide:end -->
 
 ## 检查

@@ -63,7 +63,8 @@ atlas-crash-ndk = { module = "dev.appatlas:atlas-crash-ndk", version = "0.2.0" }
 <!-- tabs:end -->
 
 <!-- guide:start -->
-## Start
+
+## Core
 
 <!-- tabs:start -->
 #### Kotlin
@@ -93,6 +94,18 @@ public class MyApplication extends Application {
 }
 ```
 <!-- tabs:end -->
+
+### Modules
+
+| Artifact | What it is | minSdk |
+|---|---|---|
+| `atlas-core` | Envelopes, the disk queue, the sender. Every module rides it. | 16 |
+| `atlas-links` | Deep-link inflow: deferred claims and direct opens. | 16 |
+| `atlas-crash` | Crash reporting: uncaught exceptions, handled errors, ANRs, kills, sessions. | 16 |
+| `atlas-crash-ndk` | Native signal capture for C/C++ code: SIGSEGV, SIGABRT, SIGBUS, SIGFPE, SIGILL. | 21 |
+
+`atlas-links` brings the Play install-referrer library with it, so the
+deferred link works with the one dependency above.
 
 ## Links
 
@@ -176,6 +189,27 @@ A deferred link needs no extra call: the first launch reads the Play install
 referrer once, claims the token it carries, and the same listener receives the
 link. `AtlasLinks.firstReferringLink()` returns the link that produced the
 install, forever, for referral rewards.
+
+### Deep-link detection (optional)
+
+For `navigator.getInstalledRelatedApps()` to answer "installed" on the visit
+page instead of guessing, the app must vouch for the link's origin. Add to
+`AndroidManifest.xml` inside `<application>`:
+
+```xml title="AndroidManifest.xml"
+<meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
+```
+
+```xml title="res/values/strings.xml"
+<!-- res/values/strings.xml — if you already have asset_statements, add the
+     object below to your existing array instead. -->
+<string name="asset_statements" translatable="false">
+  [{
+    \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+    \"target\": {\"namespace\": \"web\", \"site\": \"https://appatlas.dev\"}
+  }]
+</string>
+```
 
 ## Crash
 
@@ -267,19 +301,7 @@ next start.
 `AtlasCrash.setEnabled(false)` stops collection and remembers the choice, for a consent
 screen. `AtlasCrash.crashedLastRun()` says whether the previous run ended in a crash.
 
-## Modules
-
-| Artifact | What it is | minSdk |
-|---|---|---|
-| `atlas-core` | Envelopes, the disk queue, the sender. Every module rides it. | 16 |
-| `atlas-links` | Deep-link inflow: deferred claims and direct opens. | 16 |
-| `atlas-crash` | Crash reporting: uncaught exceptions, handled errors, ANRs, kills, sessions. | 16 |
-| `atlas-crash-ndk` | Native signal capture for C/C++ code: SIGSEGV, SIGABRT, SIGBUS, SIGFPE, SIGILL. | 21 |
-
-`atlas-links` brings the Play install-referrer library with it, so the
-deferred link works with the one dependency above.
-
-## Readable stack traces (minified builds)
+### Readable stack traces (minified builds)
 
 A build minified by R8 reports obfuscated frames. Give each build an id, ship it in
 the manifest, and upload that build's `mapping.txt` under the same id. Upload before
@@ -311,7 +333,7 @@ tasks.register('uploadAtlasMapping', Exec) {
 <meta-data android:name="dev.appatlas.sdk.mappingId" android:value="${atlasMappingId}"/>
 ```
 
-## Native stack traces
+### Native stack traces
 
 A native crash is reported as build id plus module-relative addresses. Upload each `.so` you ship,
 unstripped, and the server resolves function, file and line. The id is the library's own GNU build id;
@@ -328,33 +350,13 @@ for so in app/build/intermediates/merged_native_libs/release/mergeReleaseNativeL
 done
 ```
 
-## Deep-link detection (optional)
-
-For `navigator.getInstalledRelatedApps()` to answer "installed" on the visit
-page instead of guessing, the app must vouch for the link's origin. Add to
-`AndroidManifest.xml` inside `<application>`:
-
-```xml title="AndroidManifest.xml"
-<meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
-```
-
-```xml title="res/values/strings.xml"
-<!-- res/values/strings.xml — if you already have asset_statements, add the
-     object below to your existing array instead. -->
-<string name="asset_statements" translatable="false">
-  [{
-    \"relation\": [\"delegate_permission/common.handle_all_urls\"],
-    \"target\": {\"namespace\": \"web\", \"site\": \"https://appatlas.dev\"}
-  }]
-</string>
-```
-
 ## Privacy
 
 The SDK mints an install-scoped random id and reads no device or advertising
 identifier — not GAID, not the hardware id, nothing that survives an uninstall.
 Device context (OS version, model, locale, timezone, app version, installer) is
 the standard crash-report set and identifies no one.
+
 <!-- guide:end -->
 
 ## Checks

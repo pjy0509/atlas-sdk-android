@@ -63,7 +63,8 @@ atlas-crash-ndk = { module = "dev.appatlas:atlas-crash-ndk", version = "0.2.0" }
 <!-- tabs:end -->
 
 <!-- guide:start -->
-## 시작
+
+## 코어
 
 <!-- tabs:start -->
 #### Kotlin
@@ -93,6 +94,18 @@ public class MyApplication extends Application {
 }
 ```
 <!-- tabs:end -->
+
+### 모듈
+
+| 아티팩트 | 역할 | minSdk |
+|---|---|---|
+| `atlas-core` | 엔벨로프, 디스크 큐, 전송기. 모든 모듈의 바탕입니다. | 16 |
+| `atlas-links` | 딥링크 유입: 디퍼드 교환과 직접 열림. | 16 |
+| `atlas-crash` | 크래시 리포팅: 미처리 예외, 처리된 오류, ANR, kill, 세션. | 16 |
+| `atlas-crash-ndk` | C/C++ 코드의 네이티브 시그널 캡처: SIGSEGV, SIGABRT, SIGBUS, SIGFPE, SIGILL. | 21 |
+
+`atlas-links`가 Play install-referrer 라이브러리를 함께 가져오므로,
+위의 의존성 하나로 디퍼드 링크까지 동작합니다.
 
 ## Links
 
@@ -176,6 +189,27 @@ protected void onNewIntent(Intent intent) {
 한 번 읽고 거기 실린 토큰을 교환하며, 같은 리스너가 링크를 받습니다.
 `AtlasLinks.firstReferringLink()`는 설치를 만든 링크를 언제까지나 돌려주므로
 추천 보상에 쓸 수 있습니다.
+
+### 딥링크 감지 (선택)
+
+방문 페이지의 `navigator.getInstalledRelatedApps()`가 추측 대신 "설치됨"으로
+답하려면, 앱이 링크 출처를 보증해야 합니다. `AndroidManifest.xml`의
+`<application>` 안에 추가합니다.
+
+```xml title="AndroidManifest.xml"
+<meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
+```
+
+```xml title="res/values/strings.xml"
+<!-- res/values/strings.xml — asset_statements가 이미 있다면 아래 객체를
+     기존 배열에 추가합니다. -->
+<string name="asset_statements" translatable="false">
+  [{
+    \"relation\": [\"delegate_permission/common.handle_all_urls\"],
+    \"target\": {\"namespace\": \"web\", \"site\": \"https://appatlas.dev\"}
+  }]
+</string>
+```
 
 ## Crash
 
@@ -266,19 +300,7 @@ private void pay() {
 `AtlasCrash.setEnabled(false)`는 수집을 멈추고 그 선택을 기억합니다. 동의 화면에 씁니다.
 `AtlasCrash.crashedLastRun()`은 직전 실행이 크래시로 끝났는지 알려 줍니다.
 
-## 모듈
-
-| 아티팩트 | 역할 | minSdk |
-|---|---|---|
-| `atlas-core` | 엔벨로프, 디스크 큐, 전송기. 모든 모듈의 바탕입니다. | 16 |
-| `atlas-links` | 딥링크 유입: 디퍼드 교환과 직접 열림. | 16 |
-| `atlas-crash` | 크래시 리포팅: 미처리 예외, 처리된 오류, ANR, kill, 세션. | 16 |
-| `atlas-crash-ndk` | C/C++ 코드의 네이티브 시그널 캡처: SIGSEGV, SIGABRT, SIGBUS, SIGFPE, SIGILL. | 21 |
-
-`atlas-links`가 Play install-referrer 라이브러리를 함께 가져오므로,
-위의 의존성 하나로 디퍼드 링크까지 동작합니다.
-
-## 읽을 수 있는 스택 트레이스 (난독화 빌드)
+### 읽을 수 있는 스택 트레이스 (난독화 빌드)
 
 R8로 난독화한 빌드는 난독화된 프레임을 보냅니다. 빌드마다 id를 하나 만들어
 매니페스트에 싣고, 그 빌드의 `mapping.txt`를 같은 id로 업로드합니다.
@@ -310,7 +332,7 @@ tasks.register('uploadAtlasMapping', Exec) {
 <meta-data android:name="dev.appatlas.sdk.mappingId" android:value="${atlasMappingId}"/>
 ```
 
-## 네이티브 스택 트레이스
+### 네이티브 스택 트레이스
 
 네이티브 크래시는 build id와 모듈 상대 주소로 보고됩니다. 배포하는 `.so`를 스트립하지 않은 채 올리면
 서버가 함수, 파일, 행으로 복원합니다. id는 라이브러리 자체의 GNU build id이며 서버가 파일에서 읽으므로
@@ -327,33 +349,13 @@ for so in app/build/intermediates/merged_native_libs/release/mergeReleaseNativeL
 done
 ```
 
-## 딥링크 감지 (선택)
-
-방문 페이지의 `navigator.getInstalledRelatedApps()`가 추측 대신 "설치됨"으로
-답하려면, 앱이 링크 출처를 보증해야 합니다. `AndroidManifest.xml`의
-`<application>` 안에 추가합니다.
-
-```xml title="AndroidManifest.xml"
-<meta-data android:name="asset_statements" android:resource="@string/asset_statements"/>
-```
-
-```xml title="res/values/strings.xml"
-<!-- res/values/strings.xml — asset_statements가 이미 있다면 아래 객체를
-     기존 배열에 추가합니다. -->
-<string name="asset_statements" translatable="false">
-  [{
-    \"relation\": [\"delegate_permission/common.handle_all_urls\"],
-    \"target\": {\"namespace\": \"web\", \"site\": \"https://appatlas.dev\"}
-  }]
-</string>
-```
-
 ## 프라이버시
 
 SDK는 설치 단위의 난수 id 하나를 만들 뿐, 기기 식별자나 광고 식별자를 읽지
 않습니다. GAID도, 하드웨어 id도, 삭제 후에 남는 어떤 것도 읽지 않습니다.
 함께 보내는 기기 정보(OS 버전, 모델, 로캘, 시간대, 앱 버전, 설치 출처)는
 일반적인 크래시 리포트 항목이며 누구도 특정하지 않습니다.
+
 <!-- guide:end -->
 
 ## 검사
