@@ -1,18 +1,65 @@
 #!/bin/sh
-# The native capture gate. The Android build compiles atlas_crash.c with the
-# NDK; here it is built with the host cc so the handler runs against real
-# signals — a crash in other code, from any thread, must land on disk with
-# its frames. Skipped when no C compiler is present (the JVM gate still runs).
+# The native capture gate, in whichever tier this host can reach.
+#
+#   Linux + a C compiler: the real tier. The handler is built for the host and
+#   fired at with real signals — a crash in other code, from any thread, must
+#   land on disk with its frames.
+#
+#   Anywhere else (a Mac, say): the core targets Linux — /proc/self/maps, ELF
+#   headers, the GNU unwinder — so it cannot be built or run for this host at
+#   all. The NDK's clang, which targets what the product ships to, compiles it
+#   under -Werror for every ABI instead. That proves the source, not the
+#   behaviour; the behaviour is proven wherever Linux is (CI, a container).
 set +e
 HERE="$(cd "$(dirname "$0")" && pwd)"
 CORE="$HERE/../../atlas-crash-ndk/src/main/cpp"
+
+# --- the compile-only tier ------------------------------------------------------
+
+ndk_clang() {
+    for root in "$ANDROID_NDK_HOME" "$ANDROID_NDK" "$ANDROID_HOME"/ndk/* "$ANDROID_SDK_ROOT"/ndk/* \
+                "$HOME/Library/Android/sdk/ndk"/* "$HOME/Android/Sdk/ndk"/*; do
+        [ -d "$root" ] || continue
+
+        for bin in "$root"/toolchains/llvm/prebuilt/*/bin/clang; do
+            [ -x "$bin" ] && echo "$bin" && return 0
+        done
+    done
+
+    return 1
+}
+
+compile_only() {
+    CLANG="$(ndk_clang)" || {
+        echo "native: not Linux and no NDK found, skipping the signal-handler tier"
+        exit 0
+    }
+
+    OUT="${TMPDIR:-/tmp}/atlas-native-gate"
+    rm -rf "$OUT"
+    mkdir -p "$OUT"
+    status=0
+
+    for target in aarch64-linux-android21 armv7a-linux-androideabi21 x86_64-linux-android21 i686-linux-android21; do
+        if ! "$CLANG" --target="$target" -c -O2 -Wall -Wextra -Werror -fno-omit-frame-pointer \
+                -o "$OUT/$target.o" "$CORE/atlas_crash.c" 2>"$OUT/$target.log"; then
+            echo "native: [$target] did not compile" >&2
+            cat "$OUT/$target.log" >&2
+            status=1
+        fi
+    done
+
+    [ "$status" -eq 0 ] && echo "native: the handler compiles clean for every ABI (run the signal tier on Linux)"
+
+    exit $status
+}
+
+[ "$(uname -s)" = "Linux" ] || compile_only
+command -v "${CC:-cc}" >/dev/null 2>&1 || compile_only
+
+# --- the real tier --------------------------------------------------------------
+
 CC="${CC:-cc}"
-
-if ! command -v "$CC" >/dev/null 2>&1; then
-    echo "native: no C compiler, skipping the signal-handler tier"
-    exit 0
-fi
-
 OUT="${TMPDIR:-/tmp}/atlas-native-gate"
 rm -rf "$OUT"
 mkdir -p "$OUT"
