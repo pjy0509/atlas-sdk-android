@@ -201,7 +201,7 @@ protected void onNewIntent(Intent intent) {
 ```
 
 ```xml title="res/values/strings.xml"
-<!-- res/values/strings.xml — 如果已有 asset_statements，把下面的对象
+<!-- res/values/strings.xml。如果已有 asset_statements，把下面的对象
      加进现有数组即可。 -->
 <string name="asset_statements" translatable="false">
   [{
@@ -286,10 +286,10 @@ private void pay() {
 
 | 崩溃方式 | 捕获方式 |
 |---|---|
-| 任意线程的未捕获异常，含 `OutOfMemoryError` | 进程级处理器，链接在原有处理器之前 |
-| ANR | Android 11 及以上：系统自身的退出记录及线程转储。以下：主线程看门狗，并与系统错误状态交叉核对，调试器暂停不会计入 |
-| 来自外部的 kill、低内存 kill、资源超限 kill | 下次启动时读取系统退出记录 |
-| C/C++ 代码中的原生信号（SIGSEGV、SIGABRT、SIGBUS、SIGFPE、SIGILL），任意线程 | `atlas-crash-ndk`：async-signal-safe 处理器记录，下次启动时发送 |
+| 任意线程的未捕获异常，含 `OutOfMemoryError`。 | 进程级处理器，链接在原有处理器之前。 |
+| ANR. | Android 11 及以上：系统自身的退出记录及线程转储。以下：主线程看门狗，并与系统错误状态交叉核对，调试器暂停不会计入。 |
+| 来自外部的 kill、低内存 kill、资源超限 kill。 | 下次启动时读取系统退出记录。 |
+| C/C++ 代码中的原生信号（SIGSEGV、SIGABRT、SIGBUS、SIGFPE、SIGILL），任意线程。 | `atlas-crash-ndk`：async-signal-safe 处理器记录，下次启动时发送。 |
 
 崩溃会在即将终止的线程上先写入磁盘，并在下次启动时与会话的结束状态一同发送。
 crash-free 会话即据此计算。每份报告都附带最近 100 条面包屑、最多 64 个键、

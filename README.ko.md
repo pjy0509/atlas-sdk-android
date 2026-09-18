@@ -201,7 +201,7 @@ protected void onNewIntent(Intent intent) {
 ```
 
 ```xml title="res/values/strings.xml"
-<!-- res/values/strings.xml — asset_statements가 이미 있다면 아래 객체를
+<!-- res/values/strings.xml. asset_statements가 이미 있다면 아래 객체를
      기존 배열에 추가합니다. -->
 <string name="asset_statements" translatable="false">
   [{
@@ -286,10 +286,10 @@ private void pay() {
 
 | 죽는 방식 | 잡는 방법 |
 |---|---|
-| 어느 스레드든 미처리 예외, `OutOfMemoryError` 포함 | 프로세스 전체 핸들러. 기존 핸들러 앞에 체인으로 들어갑니다 |
-| ANR | Android 11 이상: OS 자체의 종료 기록과 스레드 덤프. 그 아래: 메인 루퍼 워치독. 시스템의 오류 상태와 교차 확인하므로 디버거로 멈춘 것은 세지 않습니다 |
-| 외부에서 온 kill, 저메모리 kill, 과다 자원 사용 kill | 다음 실행 때 OS 종료 기록에서 읽습니다 |
-| C/C++ 코드의 네이티브 시그널(SIGSEGV, SIGABRT, SIGBUS, SIGFPE, SIGILL), 어느 스레드든 | `atlas-crash-ndk`. async-signal-safe 핸들러가 기록하고 다음 실행 때 보냅니다 |
+| 어느 스레드든 미처리 예외, `OutOfMemoryError` 포함. | 프로세스 전체 핸들러. 기존 핸들러 앞에 체인으로 들어갑니다. |
+| ANR. | Android 11 이상: OS 자체의 종료 기록과 스레드 덤프. 그 아래: 메인 루퍼 워치독. 시스템의 오류 상태와 교차 확인하므로 디버거로 멈춘 것은 세지 않습니다. |
+| 외부에서 온 kill, 저메모리 kill, 과다 자원 사용 kill. | 다음 실행 때 OS 종료 기록에서 읽습니다. |
+| C/C++ 코드의 네이티브 시그널(SIGSEGV, SIGABRT, SIGBUS, SIGFPE, SIGILL), 어느 스레드든. | `atlas-crash-ndk`. async-signal-safe 핸들러가 기록하고 다음 실행 때 보냅니다. |
 
 크래시는 죽어 가는 스레드에서 디스크에 먼저 기록되고, 다음 실행 때 세션 종료 상태와 함께
 전송됩니다. crash-free 세션은 이 세션으로 계산합니다. 모든 리포트에 최근 브레드크럼 100개,

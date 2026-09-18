@@ -3,7 +3,7 @@
 [한국어](README.ko.md) · [中文](README.zh.md)
 
 The client half of [App Atlas](https://appatlas.dev) on Android: deep links and
-crash reporting. Pure Java, **minSdk 16** — the floor the incumbents walked away
+crash reporting. Pure Java, **minSdk 16**, the floor the incumbents walked away
 from. Native crash capture is a separate artifact at 21, the NDK's own floor.
 
 ## Install
@@ -201,7 +201,7 @@ page instead of guessing, the app must vouch for the link's origin. Add to
 ```
 
 ```xml title="res/values/strings.xml"
-<!-- res/values/strings.xml — if you already have asset_statements, add the
+<!-- res/values/strings.xml. If you already have asset_statements, add the
      object below to your existing array instead. -->
 <string name="asset_statements" translatable="false">
   [{
@@ -286,10 +286,10 @@ What is caught, with no call beyond `Atlas.start`:
 
 | Death | How it is caught |
 |---|---|
-| An uncaught exception on any thread, `OutOfMemoryError` included | The process-wide handler, chained ahead of whoever held it |
-| An ANR | Android 11+: the OS's own exit record, with its thread dump. Below: a main-looper watchdog, cross-checked against the system's error state so a paused debugger never counts |
-| A kill from outside, a low-memory kill, an excessive-resource kill | The OS's exit record, at the next start |
-| A native signal in C or C++ code (SIGSEGV, SIGABRT, SIGBUS, SIGFPE, SIGILL), from any thread | `atlas-crash-ndk`: an async-signal-safe handler, sent at the next start |
+| An uncaught exception on any thread, `OutOfMemoryError` included. | The process-wide handler, chained ahead of whoever held it. |
+| An ANR. | Android 11+: the OS's own exit record, with its thread dump. Below: a main-looper watchdog, cross-checked against the system's error state so a paused debugger never counts. |
+| A kill from outside, a low-memory kill, an excessive-resource kill. | The OS's exit record, at the next start. |
+| A native signal in C or C++ code (SIGSEGV, SIGABRT, SIGBUS, SIGFPE, SIGILL), from any thread. | `atlas-crash-ndk`: an async-signal-safe handler, sent at the next start. |
 
 A crash is written to disk on the dying thread and sent at the next start, together with
 the end of its session, which is what crash-free sessions are counted from. Every report
@@ -353,7 +353,7 @@ done
 ## Privacy
 
 The SDK mints an install-scoped random id and reads no device or advertising
-identifier — not GAID, not the hardware id, nothing that survives an uninstall.
+identifier: not GAID, not the hardware id, nothing that survives an uninstall.
 Device context (OS version, model, locale, timezone, app version, installer) is
 the standard crash-report set and identifies no one.
 
