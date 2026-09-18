@@ -1,0 +1,55 @@
+// atlas-crash-ndk: native signal capture (SIGSEGV, SIGABRT, SIGBUS, SIGFPE,
+// SIGILL, SIGTRAP, SIGSYS) for apps that ship C/C++. Its own artifact because
+// the NDK's floor is 21 while atlas-crash stays at 16; atlas-crash finds it by
+// name at start, so an app that ships it gets native crashes with no extra call.
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'dev.appatlas.sdk.crash.ndk'
+    compileSdk 34
+    // Pinned: the build id and the unwinder's CFI both come from this toolchain.
+    ndkVersion '27.2.12479018'
+
+    defaultConfig {
+        minSdk 21
+        consumerProguardFiles 'consumer-rules.pro'
+
+        externalNativeBuild {
+            cmake {
+                // No STL: the handler needs none, and its absence is the size story.
+                arguments '-DANDROID_STL=none'
+            }
+        }
+
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86_64', 'x86'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+            version '3.22.1'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+dependencies {
+    api project(':atlas-crash')
+}
+
+ext.moduleDescription = 'Native signal capture for the App Atlas SDK: crashes in C and C++ code, symbolicated on the server.'
+
+apply from: rootProject.file('gradle/publishing.gradle')

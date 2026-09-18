@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class AtlasCore {
 
-    public static final String VERSION = "0.1.1";
+    public static final String VERSION = "0.2.0";
 
     private final String sdkName;
     private final String baseUrl;
@@ -73,21 +73,51 @@ public final class AtlasCore {
     /**
      * One item, disk-first, then the wire. Only the in-memory serialization
      * happens on the caller's thread; the disk write rides the worker, so a
-     * main-thread caller never blocks on I/O. A synchronous door will come
-     * with the crash module, where the writing thread is about to die.
+     * main-thread caller never blocks on I/O.
      */
     public void enqueue(String type, Map<String, Object> payload) {
-        final byte[] envelope = new EnvelopeWriter(sdkName, VERSION, isoNow(), installId, context)
-                .add(type, payload)
-                .bytes();
+        batch().add(type, payload).enqueue();
+    }
 
-        worker.execute(new Runnable() {
-            @Override
-            public void run() {
-                queue.offer(envelope);
-                drain();
-            }
-        });
+    /** Several items that must arrive together: a crash and its session's end. */
+    public Batch batch() {
+        return new Batch();
+    }
+
+    /** Items bound for one envelope, so a flaky network cannot deliver half. */
+    public final class Batch {
+
+        private final EnvelopeWriter writer = new EnvelopeWriter(sdkName, VERSION, isoNow(), installId, context);
+
+        private Batch() {
+        }
+
+        public Batch add(String type, Map<String, Object> payload) {
+            writer.add(type, payload);
+
+            return this;
+        }
+
+        /** Disk on the worker, then the wire. */
+        public void enqueue() {
+            final byte[] envelope = writer.bytes();
+
+            worker.execute(new Runnable() {
+                @Override
+                public void run() {
+                    queue.offer(envelope);
+                    drain();
+                }
+            });
+        }
+
+        /**
+         * Disk on the caller's thread, and nothing else: for a thread about
+         * to die with its process. The next start's flush is the delivery.
+         */
+        public boolean persistNow() {
+            return queue.offer(writer.bytes(), true) != null;
+        }
     }
 
     /** Drain whatever the disk holds — called at start and after each offer. */
@@ -98,6 +128,28 @@ public final class AtlasCore {
                 drain();
             }
         });
+    }
+
+    /**
+     * Drains on the worker and waits at most `timeoutMs` for it: for the start
+     * after a launch crash, where the next crash may come before any
+     * background send would.
+     */
+    public void flushWithin(long timeoutMs) {
+        if (timeoutMs <= 0) {
+            return;
+        }
+
+        try {
+            worker.submit(new Runnable() {
+                @Override
+                public void run() {
+                    drain();
+                }
+            }).get(timeoutMs, TimeUnit.MILLISECONDS);
+        } catch (Exception late) {
+            // Out of time or interrupted: the drain carries on in the background.
+        }
     }
 
     /** Waits for the worker to go idle; for tests, never for app code. */
@@ -169,11 +221,16 @@ public final class AtlasCore {
         }
     }
 
-    private static String isoNow() {
+    public static String isoNow() {
+        return iso(System.currentTimeMillis());
+    }
+
+    /** UTC to the second, the one timestamp shape every item carries. */
+    public static String iso(long epochMs) {
         // No java.time below API 26; SimpleDateFormat reaches every floor.
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        return format.format(new Date());
+        return format.format(new Date(epochMs));
     }
 }

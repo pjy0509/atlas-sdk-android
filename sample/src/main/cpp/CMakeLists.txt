@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.18.1)
+project(boom C)
+add_library(boom SHARED boom.c)
+target_compile_options(boom PRIVATE -g -O1 -fno-omit-frame-pointer)
+target_link_options(boom PRIVATE -Wl,--build-id=sha1)

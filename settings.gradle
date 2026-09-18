@@ -19,3 +19,7 @@ rootProject.name = 'atlas-sdk-android'
 
 include ':atlas-core'
 include ':atlas-links'
+include ':atlas-crash'
+include ':atlas-crash-ndk'
+// The sample app: the integration test, not published.
+include ':sample'

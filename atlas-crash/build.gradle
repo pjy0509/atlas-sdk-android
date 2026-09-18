@@ -1,0 +1,38 @@
+// atlas-crash: uncaught exceptions, handled errors, ANRs (watchdog below 30, the
+// OS's exit record from 30), out-of-memory kills, and the sessions crash-free is
+// counted from. Pure Java, no dependencies — that is what keeps the floor at 16.
+// Native signal capture is atlas-crash-ndk, at 21, which this module finds by name.
+apply plugin: 'com.android.library'
+
+android {
+    namespace 'dev.appatlas.sdk.crash'
+    compileSdk 34
+
+    defaultConfig {
+        minSdk 16
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    // The sources stay Java 7 syntax — that is what an old toolchain needs —
+    // but modern JDKs refuse to compile against level 7, so the target is 8.
+    // Nothing here uses a Java 8 language feature, so nothing is desugared.
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
+}
+
+dependencies {
+    api project(':atlas-core')
+}
+
+ext.moduleDescription = 'Crash reporting for the App Atlas SDK: JVM crashes, ANRs, out-of-memory kills, handled errors and sessions; add atlas-crash-ndk for native signals.'
+
+apply from: rootProject.file('gradle/publishing.gradle')

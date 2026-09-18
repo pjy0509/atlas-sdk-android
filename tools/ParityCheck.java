@@ -32,8 +32,9 @@ public final class ParityCheck {
         checkTransportVerdicts();
         checkJsonRoundTrip();
         LinksParity.run(outDir);
+        dev.appatlas.sdk.crash.CrashParity.run(outDir);
 
-        System.out.println("parity: envelopes, queue, transport, json and links hold");
+        System.out.println("parity: envelopes, queue, transport, json, links and crash hold");
     }
 
     private static void writeSamples(File outDir) throws IOException {

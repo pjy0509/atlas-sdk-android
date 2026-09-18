@@ -57,6 +57,8 @@ public final class Atlas {
 
         // Modules on the classpath wake with the core; an artifact the app
         // did not ship is simply absent (bugsnag's plugin-loading shape).
+        // Crash first: whatever a later module breaks is then already caught.
+        bootModule("dev.appatlas.sdk.crash.AtlasCrash", app);
         bootModule("dev.appatlas.sdk.links.AtlasLinks", app);
     }
 

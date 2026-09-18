@@ -16,6 +16,9 @@ public final class DiskQueue {
 
     public static final int MAX_FILES = 30;
     private static final String SUFFIX = ".envelope";
+    // A kept envelope (a crash) is the last thing the cap evicts: thirty
+    // offline launches must not push out the one report that matters.
+    private static final String KEPT = "_keep";
 
     private final File dir;
     private int counter;
@@ -27,16 +30,30 @@ public final class DiskQueue {
     }
 
     /** Persists the envelope, evicting the oldest past the cap. */
-    public synchronized File offer(byte[] envelope) {
+    public File offer(byte[] envelope) {
+        return offer(envelope, false);
+    }
+
+    /** `keep` marks an envelope the cap evicts only when nothing else is left. */
+    public synchronized File offer(byte[] envelope, boolean keep) {
         dir.mkdirs();
 
         File[] present = list();
+        int excess = present.length - MAX_FILES + 1;
 
-        for (int i = 0; i <= present.length - MAX_FILES; i++) {
-            present[i].delete();
+        for (int pass = 0; pass < 2 && excess > 0; pass++) {
+            for (int i = 0; i < present.length && excess > 0; i++) {
+                boolean kept = present[i] != null && present[i].getName().endsWith(KEPT + SUFFIX);
+
+                if (present[i] != null && kept == (pass == 1)) {
+                    present[i].delete();
+                    present[i] = null;
+                    excess--;
+                }
+            }
         }
 
-        File file = new File(dir, System.currentTimeMillis() + "_" + (counter++ % 1000) + SUFFIX);
+        File file = new File(dir, System.currentTimeMillis() + "_" + (counter++ % 1000) + (keep ? KEPT : "") + SUFFIX);
 
         try {
             FileOutputStream stream = new FileOutputStream(file);
